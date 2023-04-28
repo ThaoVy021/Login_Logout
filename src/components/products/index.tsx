@@ -1,6 +1,7 @@
 import { Card } from "antd";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../utils/auth";
+import User from "../user";
 import "./index.scss";
 
 const { Meta } = Card;
@@ -14,16 +15,22 @@ export default function Products() {
   };
   return (
     <div>
-      <div className="logInOut">
-        {authTokens ? (
-          <Link onClick={handleLogout} to={""}>
-            {" "}
-            Log Out{" "}
-          </Link>
-        ) : (
-          <Link to="/sign_in">Log In</Link>
-        )}
+      <div className="flex justify-end header">
+        <div className="logInOut">
+          {authTokens ? (
+            <Link onClick={handleLogout} to={""}>
+              {" "}
+              Log Out{" "}
+            </Link>
+          ) : (
+            <Link to="/sign_in">Log In</Link>
+          )}
+        </div>
+        <div>
+          <User />
+        </div>
       </div>
+
       <Card
         hoverable
         style={{ width: 240, margin: "0 auto" }}
