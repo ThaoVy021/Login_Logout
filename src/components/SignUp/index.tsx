@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Button, Form, Input, Typography, Upload } from "antd";
 
 import type { RcFile, UploadFile, UploadProps } from "antd/es/upload/interface";
+import axios from "axios";
+import { useAuth } from "../../utils/auth";
 
 const onFinish = (values: any) => {
   console.log("Success:", values);
@@ -18,6 +20,11 @@ function SignUp() {
     setFileList(newFileList);
   };
 
+  const [name, setName] = useState("");
+  const [username, setUserName] = useState("");
+  const [password, setPassword] = useState("");
+  const { setAuthTokens } = useAuth();
+
   const onPreview = async (file: UploadFile) => {
     let src = file.url as string;
     if (!src) {
@@ -32,6 +39,29 @@ function SignUp() {
     const imgWindow = window.open(src);
     imgWindow?.document.write(image.outerHTML);
   };
+
+  const avatar = fileList[0] ? fileList[0].thumbUrl?.slice(22) : undefined;
+
+  async function submitSignup() {
+    await axios
+      .post("http://localhost:8081/user/register", {
+        name,
+        username,
+        password,
+        avatar,
+      })
+      .then((res) => {
+        console.log(res);
+        // if (res.data.success === true) {
+        //   localStorage.token = res.data.token;
+        //   localStorage.isAuthenticated = true;
+        //   window.location.reload();
+        // }
+      });
+    // .catch((err) => {
+    //   console.log("Sign up data submit error: ", err);
+    // });
+  }
 
   return (
     <div>
@@ -52,13 +82,18 @@ function SignUp() {
           name="name"
           rules={[{ required: true, message: "Please input your name!" }]}
         >
-          <Input />
+          <Input
+            value={name}
+            onChange={(e) => {
+              setName(e.target.value);
+            }}
+          />
         </Form.Item>
 
         <Form.Item
           label="Avatar"
           name="avatar"
-          rules={[{ required: false, message: "Please input your avatar!" }]}
+          rules={[{ required: true, message: "Please input your avatar!" }]}
         >
           <Upload
             action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
@@ -66,6 +101,7 @@ function SignUp() {
             fileList={fileList}
             onChange={onChange}
             onPreview={onPreview}
+            beforeUpload={() => false}
           >
             {fileList.length < 1 && "+ Upload"}
           </Upload>
@@ -76,7 +112,12 @@ function SignUp() {
           name="username"
           rules={[{ required: true, message: "Please input your username!" }]}
         >
-          <Input />
+          <Input
+            value={username}
+            onChange={(e) => {
+              setUserName(e.target.value);
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -84,13 +125,19 @@ function SignUp() {
           name="password"
           rules={[{ required: true, message: "Please input your password!" }]}
         >
-          <Input.Password />
+          <Input.Password
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+          />
         </Form.Item>
 
         <Form.Item>
           <Button
             type="primary"
             htmlType="submit"
+            onClick={submitSignup}
             className="w-full text-base font-medium justify-center hover:bg-transparent"
           >
             Sign Up

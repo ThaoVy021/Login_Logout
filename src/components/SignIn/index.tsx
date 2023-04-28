@@ -32,7 +32,6 @@ function SignIn() {
       })
       .then((result) => {
         const token = result.data.access_token;
-        console.log(token);
         if (result.status === 200) {
           setAuthTokens(token);
           moveToHome();
