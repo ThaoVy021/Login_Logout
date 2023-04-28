@@ -3,7 +3,7 @@ import { Button, Form, Input, Typography, Upload } from "antd";
 
 import type { RcFile, UploadFile, UploadProps } from "antd/es/upload/interface";
 import axios from "axios";
-import { useAuth } from "../../utils/auth";
+import { useNavigate } from "react-router-dom";
 
 const onFinish = (values: any) => {
   console.log("Success:", values);
@@ -23,7 +23,11 @@ function SignUp() {
   const [name, setName] = useState("");
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
-  const { setAuthTokens } = useAuth();
+
+  const navigate = useNavigate();
+  const moveToLogIn = () => {
+    navigate("/sign_in");
+  };
 
   const onPreview = async (file: UploadFile) => {
     let src = file.url as string;
@@ -51,16 +55,15 @@ function SignUp() {
         avatar,
       })
       .then((res) => {
-        console.log(res);
-        // if (res.data.success === true) {
-        //   localStorage.token = res.data.token;
-        //   localStorage.isAuthenticated = true;
-        //   window.location.reload();
-        // }
+        if (res.data.message === "success") {
+          alert("you registered success");
+          moveToLogIn();
+          window.location.reload();
+        }
+      })
+      .catch((err) => {
+        console.log("Sign up data submit error: ", err);
       });
-    // .catch((err) => {
-    //   console.log("Sign up data submit error: ", err);
-    // });
   }
 
   return (
