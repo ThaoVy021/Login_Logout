@@ -1,7 +1,9 @@
 import { Card } from "antd";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../utils/auth";
-import User from "../user";
+import { useNavigate } from "react-router-dom";
+import { Tooltip } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import "./index.scss";
 
 const { Meta } = Card;
@@ -13,21 +15,32 @@ export default function Products() {
     authTokens = " ";
     window.location.reload();
   };
+
+  const navigate = useNavigate();
+  const moveToUserPage = () => {
+    navigate("/user");
+  };
   return (
     <div>
       <div className="flex justify-end header">
         <div className="logInOut">
           {authTokens ? (
-            <Link onClick={handleLogout} to={""}>
-              {" "}
-              Log Out{" "}
-            </Link>
+            <div>
+              <Link
+                style={{ marginRight: "20px" }}
+                onClick={handleLogout}
+                to={""}
+              >
+                {" "}
+                Log Out{" "}
+              </Link>
+              <Tooltip title="User Detail">
+                <UserOutlined onClick={moveToUserPage} />
+              </Tooltip>
+            </div>
           ) : (
             <Link to="/sign_in">Log In</Link>
           )}
-        </div>
-        <div>
-          <User />
         </div>
       </div>
 

@@ -6,7 +6,7 @@ import "./index.scss";
 import { Link, useNavigate } from "react-router-dom";
 
 const onFinish = (values: any) => {
-  console.log("Success:", values);
+  console.log("Success:");
 };
 
 const onFinishFailed = (errorInfo: any) => {

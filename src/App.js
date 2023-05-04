@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import { Route, Routes } from "react-router-dom";
-
 import Products from "./components/products";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
+import User from "./components/user";
 
 import { AuthContext } from "./utils/auth";
 import "./App.css";
@@ -17,6 +17,7 @@ function App() {
     localStorage.setItem("tokens", JSON.stringify(data));
     setAuthTokens(data);
   };
+
   return (
     <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
       <div className="App">
@@ -28,6 +29,9 @@ function App() {
         </Routes>
         <Routes>
           <Route path="/sign_up" element={<SignUp />} />
+        </Routes>
+        <Routes>
+          <Route path="/user" element={<User />} />
         </Routes>
       </div>
     </AuthContext.Provider>
