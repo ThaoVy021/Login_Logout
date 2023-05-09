@@ -1,14 +1,24 @@
+import { useEffect, useState } from "react";
 import { Card } from "antd";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../utils/auth";
 import { useNavigate } from "react-router-dom";
 import { Tooltip } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import axios from "axios";
 import "./index.scss";
+import { useLocation } from "react-router";
 
 const { Meta } = Card;
 
-export default function Products() {
+interface User {
+  id: number;
+  name: string;
+  username: string;
+  avatar: string;
+}
+
+export default function Products(props: User) {
   let { authTokens } = useAuth();
   const handleLogout = () => {
     localStorage.removeItem("tokens");
@@ -16,10 +26,36 @@ export default function Products() {
     window.location.reload();
   };
 
+  const [userData, setUserData] = useState({ name: "", id: 0 });
+
   const navigate = useNavigate();
   const moveToUserPage = () => {
-    navigate("/user");
+    navigate("/user/" + userData.id);
   };
+
+  const location = useLocation();
+  const tabUser = location.pathname.split("e/").pop();
+
+  useEffect(() => {
+    const getByUser = async () =>
+      await axios
+        .get("http://localhost:8081/users", {
+          headers: {
+            Authorization: `Bearer ${authTokens}`,
+          },
+        })
+        .then((response) => {
+          return response.data.map((user: User) => {
+            if (user.username === tabUser) {
+              setUserData(user);
+            }
+          });
+        })
+        .catch((err) => console.log(err));
+
+    getByUser();
+  }, []);
+
   return (
     <div>
       <div className="flex justify-end header">
@@ -54,7 +90,10 @@ export default function Products() {
           />
         }
       >
-        <Meta title="Europe Street beat" description="www.instagram.com" />
+        <Meta
+          title={`Hello ${userData.name}`}
+          description="www.instagram.com"
+        />
       </Card>
     </div>
   );

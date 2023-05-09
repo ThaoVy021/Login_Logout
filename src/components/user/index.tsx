@@ -3,7 +3,14 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../utils/auth";
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, Upload } from "antd";
+import { useLocation } from "react-router";
 import axios from "axios";
+interface User {
+  id: number;
+  name: string;
+  username: string;
+  avatar: string;
+}
 
 const normFile = (e: any) => {
   if (Array.isArray(e)) {
@@ -15,7 +22,14 @@ const normFile = (e: any) => {
 export default function User() {
   let { authTokens } = useAuth();
   const [componentDisabled, setComponentDisabled] = useState<boolean>(false);
-  const [userData, setUserData] = useState([]);
+  const [userData, setUserData] = useState({
+    id: 0,
+    name: "",
+    username: "",
+    avatar: "",
+  });
+  const location = useLocation();
+  const tabUser = location.pathname.split("r/").pop();
 
   useEffect(() => {
     axios
@@ -25,12 +39,32 @@ export default function User() {
         },
       })
       .then((response) => {
-        setUserData(response.data);
+        return response.data.map((user: User) => {
+          if (user.id === Number(tabUser)) {
+            setUserData(user);
+          }
+        });
       })
       .catch((err) => console.log(err));
   }, []);
 
-  console.log("response", userData);
+  const updateUser = () => {
+    console.log("update success");
+    axios
+      .put(`http://localhost:8081/users/${userData.id}`, {
+        userData,
+      })
+      .then((response) => {
+        console.log(response);
+        // return response.data.map((user: User) => {
+        //   if (user.id === Number(tabUser)) {
+        //     setUserData(user);
+        //   }
+        // });
+      })
+      .catch((err) => console.log(err));
+  };
+
   return (
     <div className="userPage">
       <Checkbox
@@ -48,11 +82,11 @@ export default function User() {
         style={{ maxWidth: 600 }}
       >
         <Form.Item label="Name">
-          <Input />
+          <Input value={userData.name} />
         </Form.Item>
 
         <Form.Item label="User Name">
-          <Input />
+          <Input value={userData.username} />
         </Form.Item>
 
         <Form.Item
@@ -61,14 +95,18 @@ export default function User() {
           getValueFromEvent={normFile}
         >
           <Upload action="/upload.do" listType="picture-card">
-            <div>
-              <PlusOutlined />
-              <div style={{ marginTop: 8 }}>Upload</div>
-            </div>
+            {userData.avatar ? (
+              <img src={`data:image/jpeg;base64,${userData.avatar}`} />
+            ) : (
+              <div>
+                <PlusOutlined />
+                <div style={{ marginTop: 8 }}>Upload</div>
+              </div>
+            )}
           </Upload>
         </Form.Item>
         <Form.Item label="Button">
-          <Button>Submit</Button>
+          <Button onClick={updateUser}>Submit</Button>
         </Form.Item>
       </Form>
     </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Products from "./components/products";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
@@ -22,16 +22,15 @@ function App() {
     <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
       <div className="App">
         <Routes>
-          <Route path="/" element={<Products />} />
-        </Routes>
-        <Routes>
+          <Route path={"/home" && "/home/*"} element={<Products />} />
+
           <Route path="/sign_in" element={<SignIn />} />
-        </Routes>
-        <Routes>
+
           <Route path="/sign_up" element={<SignUp />} />
-        </Routes>
-        <Routes>
-          <Route path="/user" element={<User />} />
+
+          <Route path={"/user" && "/user/*"} element={<User />} />
+
+          <Route path="/" element={<Navigate to="/home" />} />
         </Routes>
       </div>
     </AuthContext.Provider>

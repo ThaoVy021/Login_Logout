@@ -21,7 +21,7 @@ function SignIn() {
 
   const navigate = useNavigate();
   const moveToHome = () => {
-    navigate("/");
+    navigate("/home/" + username);
   };
 
   async function postLogin() {
