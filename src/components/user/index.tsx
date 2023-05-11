@@ -1,10 +1,11 @@
 import "./index.scss";
-import { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import { useAuth } from "../../utils/auth";
 import { PlusOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, Upload } from "antd";
 import { useLocation } from "react-router";
 import axios from "axios";
+import { RcFile, UploadChangeParam, UploadFile } from "antd/es/upload";
 interface User {
   id: number;
   name: string;
@@ -18,6 +19,12 @@ const normFile = (e: any) => {
   }
   return e?.fileList;
 };
+
+// const getBase64 = (img: RcFile, callback: (url: string) => void) => {
+//   const reader = new FileReader();
+//   reader.addEventListener("load", () => callback(reader.result as string));
+//   reader.readAsDataURL(img);
+// };
 
 export default function User() {
   let { authTokens } = useAuth();
@@ -44,23 +51,34 @@ export default function User() {
             setUserData(user);
           }
         });
+        // const user = response.data.find(
+        //   (user: User) => user.id === Number(tabUser)
+        // );
+        // setUserData({
+        //   ...user,
+        //   avatar: `data:image/jpeg;base64,${user.avatar}`,
+        // });
       })
       .catch((err) => console.log(err));
   }, []);
 
-  const updateUser = () => {
-    console.log("update success");
-    axios
-      .put(`http://localhost:8081/users/${userData.id}`, {
-        userData,
-      })
+  const updateUser = async (newValues: User) => {
+    console.log("update success", newValues);
+    await axios
+      .put(
+        `http://localhost:8081/user/${userData.id}`,
+        {
+          ...userData,
+          ...newValues,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${authTokens}`,
+          },
+        }
+      )
       .then((response) => {
         console.log(response);
-        // return response.data.map((user: User) => {
-        //   if (user.id === Number(tabUser)) {
-        //     setUserData(user);
-        //   }
-        // });
       })
       .catch((err) => console.log(err));
   };
@@ -79,22 +97,62 @@ export default function User() {
         wrapperCol={{ span: 14 }}
         layout="horizontal"
         disabled={!componentDisabled}
+        // key={userData.id}
         style={{ maxWidth: 600 }}
+        // initialValues={userData}
+        onFinish={(formValues) => {
+          console.log(formValues);
+          updateUser(formValues);
+          setUserData(formValues);
+          setComponentDisabled(false);
+        }}
       >
-        <Form.Item label="Name">
-          <Input value={userData.name} />
-        </Form.Item>
-
-        <Form.Item label="User Name">
-          <Input value={userData.username} />
+        <Form.Item
+          initialValue={userData.name}
+          name={componentDisabled === false ? userData.name : "name"}
+          label="Name"
+          rules={[
+            {
+              required: true,
+              message: "Please input your name!",
+            },
+          ]}
+        >
+          <Input />
         </Form.Item>
 
         <Form.Item
+          initialValue={userData.username}
+          name={componentDisabled === false ? userData.username : "username"}
+          label="User Name"
+          rules={[
+            {
+              required: true,
+              message: "Please input your username!",
+            },
+          ]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          // initialValue={userData.avatar}
+          // name={userData.avatar}
           label="Avatar"
           valuePropName="fileList"
           getValueFromEvent={normFile}
+          // getValueFromEvent={normFile}
         >
-          <Upload action="/upload.do" listType="picture-card">
+          <Upload
+            // name={"avatar"}
+            listType="picture-card"
+            // onChange={(info: UploadChangeParam<UploadFile>) => {
+            //   getBase64(info.file.originFileObj as RcFile, (url) => {
+            //     setUserData((user) => ({ ...user, avatar: url }));
+            //   });
+            // }}
+            // showUploadList={false}
+          >
             {userData.avatar ? (
               <img src={`data:image/jpeg;base64,${userData.avatar}`} />
             ) : (
@@ -105,8 +163,14 @@ export default function User() {
             )}
           </Upload>
         </Form.Item>
-        <Form.Item label="Button">
-          <Button onClick={updateUser}>Submit</Button>
+        <Form.Item
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginRight: "50px",
+          }}
+        >
+          <Button htmlType="submit">Submit</Button>
         </Form.Item>
       </Form>
     </div>

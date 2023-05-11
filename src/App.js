@@ -14,7 +14,7 @@ function App() {
     localStorage.getItem("tokens") || ""
   );
   const setTokens = (data) => {
-    localStorage.setItem("tokens", JSON.stringify(data));
+    localStorage.setItem("tokens", data);
     setAuthTokens(data);
   };
 
