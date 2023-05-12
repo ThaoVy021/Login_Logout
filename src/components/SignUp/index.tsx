@@ -44,7 +44,7 @@ function SignUp() {
     imgWindow?.document.write(image.outerHTML);
   };
 
-  const avatar = fileList[0] ? fileList[0].thumbUrl?.slice(22) : undefined;
+  const avatar = fileList[0] ? fileList[0].thumbUrl : undefined;
 
   async function submitSignup() {
     await axios

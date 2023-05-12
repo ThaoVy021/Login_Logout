@@ -1,11 +1,10 @@
 import "./index.scss";
-import React, { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../utils/auth";
-import { PlusOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input, Upload } from "antd";
 import { useLocation } from "react-router";
 import axios from "axios";
-import { RcFile, UploadChangeParam, UploadFile } from "antd/es/upload";
+import { RcFile, UploadFile, UploadProps } from "antd/es/upload";
 interface User {
   id: number;
   name: string;
@@ -13,20 +12,12 @@ interface User {
   avatar: string;
 }
 
-const normFile = (e: any) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
-
-// const getBase64 = (img: RcFile, callback: (url: string) => void) => {
-//   const reader = new FileReader();
-//   reader.addEventListener("load", () => callback(reader.result as string));
-//   reader.readAsDataURL(img);
-// };
-
 export default function User() {
+  const [form] = Form.useForm();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const onChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
+    setFileList(newFileList);
+  };
   let { authTokens } = useAuth();
   const [componentDisabled, setComponentDisabled] = useState<boolean>(false);
   const [userData, setUserData] = useState({
@@ -38,6 +29,21 @@ export default function User() {
   const location = useLocation();
   const tabUser = location.pathname.split("r/").pop();
 
+  const onPreview = async (file: UploadFile) => {
+    let src = file.url as string;
+    if (!src) {
+      src = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj as RcFile);
+        reader.onload = () => resolve(reader.result as string);
+      });
+    }
+    const image = new Image();
+    image.src = src;
+    const imgWindow = window.open(src);
+    imgWindow?.document.write(image.outerHTML);
+  };
+
   useEffect(() => {
     axios
       .get("http://localhost:8081/users", {
@@ -46,18 +52,17 @@ export default function User() {
         },
       })
       .then((response) => {
-        return response.data.map((user: User) => {
-          if (user.id === Number(tabUser)) {
-            setUserData(user);
-          }
-        });
-        // const user = response.data.find(
-        //   (user: User) => user.id === Number(tabUser)
-        // );
-        // setUserData({
-        //   ...user,
-        //   avatar: `data:image/jpeg;base64,${user.avatar}`,
-        // });
+        const user = response.data.find(
+          (user: User) => user.id === Number(tabUser)
+        );
+        form.setFieldsValue(user);
+        setFileList([
+          {
+            uid: user.id,
+            name: `${user.name}.png`,
+            url: user.avatar,
+          },
+        ]);
       })
       .catch((err) => console.log(err));
   }, []);
@@ -65,18 +70,11 @@ export default function User() {
   const updateUser = async (newValues: User) => {
     console.log("update success", newValues);
     await axios
-      .put(
-        `http://localhost:8081/user/${userData.id}`,
-        {
-          ...userData,
-          ...newValues,
+      .put(`http://localhost:8081/user/${newValues.id}`, newValues, {
+        headers: {
+          Authorization: `Bearer ${authTokens}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${authTokens}`,
-          },
-        }
-      )
+      })
       .then((response) => {
         console.log(response);
       })
@@ -93,23 +91,23 @@ export default function User() {
       </Checkbox>
 
       <Form
+        form={form}
         labelCol={{ span: 4 }}
         wrapperCol={{ span: 14 }}
         layout="horizontal"
         disabled={!componentDisabled}
-        // key={userData.id}
         style={{ maxWidth: 600 }}
-        // initialValues={userData}
+        initialValues={userData}
         onFinish={(formValues) => {
-          console.log(formValues);
           updateUser(formValues);
-          setUserData(formValues);
           setComponentDisabled(false);
         }}
       >
+        <Form.Item name="id" label="Id">
+          <Input />
+        </Form.Item>
         <Form.Item
-          initialValue={userData.name}
-          name={componentDisabled === false ? userData.name : "name"}
+          name="name"
           label="Name"
           rules={[
             {
@@ -122,8 +120,7 @@ export default function User() {
         </Form.Item>
 
         <Form.Item
-          initialValue={userData.username}
-          name={componentDisabled === false ? userData.username : "username"}
+          name="username"
           label="User Name"
           rules={[
             {
@@ -134,35 +131,22 @@ export default function User() {
         >
           <Input />
         </Form.Item>
-
-        <Form.Item
-          // initialValue={userData.avatar}
-          // name={userData.avatar}
-          label="Avatar"
-          valuePropName="fileList"
-          getValueFromEvent={normFile}
-          // getValueFromEvent={normFile}
-        >
+        <Form.Item label="Avatar" name="avatar">
           <Upload
-            // name={"avatar"}
             listType="picture-card"
-            // onChange={(info: UploadChangeParam<UploadFile>) => {
-            //   getBase64(info.file.originFileObj as RcFile, (url) => {
-            //     setUserData((user) => ({ ...user, avatar: url }));
-            //   });
-            // }}
-            // showUploadList={false}
+            fileList={fileList}
+            onChange={onChange}
+            onPreview={onPreview}
           >
-            {userData.avatar ? (
-              <img src={`data:image/jpeg;base64,${userData.avatar}`} />
+            {fileList?.length < 1 && "+ Upload"}
+            {/* {fileList?.length < 1 && userData.avatar ? (
+              <img src={userData.avatar} />
             ) : (
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Upload</div>
-              </div>
-            )}
+              fileList?.length < 1 && "+ Upload"
+            )} */}
           </Upload>
         </Form.Item>
+
         <Form.Item
           style={{
             display: "flex",
