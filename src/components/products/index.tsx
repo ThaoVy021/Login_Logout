@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../utils/auth";
 import { useNavigate } from "react-router-dom";
 import { Tooltip } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { UsergroupDeleteOutlined, UserOutlined } from "@ant-design/icons";
 import axios from "axios";
 import "./index.scss";
 import { useLocation } from "react-router";
@@ -31,6 +31,9 @@ export default function Products(props: User) {
   const navigate = useNavigate();
   const moveToUserPage = () => {
     navigate("/user/" + userData.id);
+  };
+  const moveToAllUsersPage = () => {
+    navigate("/all_users");
   };
 
   const location = useLocation();
@@ -71,11 +74,19 @@ export default function Products(props: User) {
                 Log Out{" "}
               </Link>
               <Tooltip title="User Detail">
-                <UserOutlined onClick={moveToUserPage} />
+                <UserOutlined
+                  onClick={moveToUserPage}
+                  style={{ marginRight: "20px" }}
+                />
+              </Tooltip>
+              <Tooltip title="All Users">
+                <UsergroupDeleteOutlined onClick={moveToAllUsersPage} />
               </Tooltip>
             </div>
           ) : (
-            <Link to="/sign_in">Log In</Link>
+            <Link to="/sign_in" style={{ marginRight: "20px" }}>
+              Log In
+            </Link>
           )}
         </div>
       </div>

@@ -6,7 +6,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const onFinish = (values: any) => {
-  console.log("Success:", values);
+  console.log("Success:");
 };
 
 const onFinishFailed = (errorInfo: any) => {
@@ -44,9 +44,8 @@ function SignUp() {
     imgWindow?.document.write(image.outerHTML);
   };
 
-  const avatar = fileList[0] ? fileList[0].thumbUrl : undefined;
-
   async function submitSignup() {
+    const avatar = fileList[0] ? fileList[0].thumbUrl : undefined;
     await axios
       .post("http://localhost:8081/user/register", {
         name,

@@ -55,7 +55,6 @@ export default function User() {
         const user = response.data.find(
           (user: User) => user.id === Number(tabUser)
         );
-        form.setFieldsValue(user);
         setFileList([
           {
             uid: user.id,
@@ -63,6 +62,7 @@ export default function User() {
             url: user.avatar,
           },
         ]);
+        form.setFieldsValue(user);
       })
       .catch((err) => console.log(err));
   }, []);
@@ -103,7 +103,7 @@ export default function User() {
           setComponentDisabled(false);
         }}
       >
-        <Form.Item name="id" label="Id">
+        <Form.Item name="id" label="Id" hidden>
           <Input />
         </Form.Item>
         <Form.Item
@@ -116,7 +116,7 @@ export default function User() {
             },
           ]}
         >
-          <Input />
+          <Input allowClear />
         </Form.Item>
 
         <Form.Item
@@ -129,9 +129,18 @@ export default function User() {
             },
           ]}
         >
-          <Input />
+          <Input disabled />
         </Form.Item>
-        <Form.Item label="Avatar" name="avatar">
+        <Form.Item
+          label="Avatar"
+          name="avatar"
+          rules={[
+            {
+              required: true,
+              message: "Please input your avatar!",
+            },
+          ]}
+        >
           <Upload
             listType="picture-card"
             fileList={fileList}
@@ -139,11 +148,6 @@ export default function User() {
             onPreview={onPreview}
           >
             {fileList?.length < 1 && "+ Upload"}
-            {/* {fileList?.length < 1 && userData.avatar ? (
-              <img src={userData.avatar} />
-            ) : (
-              fileList?.length < 1 && "+ Upload"
-            )} */}
           </Upload>
         </Form.Item>
 

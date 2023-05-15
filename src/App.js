@@ -5,6 +5,7 @@ import Products from "./components/products";
 import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
 import User from "./components/user";
+import AllUsers from "./components/user/AllUsersPage";
 
 import { AuthContext } from "./utils/auth";
 import "./App.css";
@@ -29,6 +30,8 @@ function App() {
           <Route path="/sign_up" element={<SignUp />} />
 
           <Route path={"/user" && "/user/*"} element={<User />} />
+
+          <Route path="/all_users" element={<AllUsers />} />
 
           <Route path="/" element={<Navigate to="/home" />} />
         </Routes>
